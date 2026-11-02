@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Models\Post;
+use App\Models\Space;
+use App\Models\Profile;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,5 +50,11 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+
+        Relation::enforceMorphMap([
+            'post' => Post::class,
+            'profile' => Profile::class,
+            'space' => Space::class,
+        ]);
     }
 }

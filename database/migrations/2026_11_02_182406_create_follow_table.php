@@ -11,9 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('follow', function (Blueprint $table) {
-            $table->id();
+        Schema::create('follows', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('follower_id')->constrained('profiles')->cascadeOnDelete();
+            $table->foreignUuid('followee_id')->constrained('profiles')->cascadeOnDelete();
+            $table->string('status')->default('accepted'); // pending, accepted
             $table->timestamps();
+
+            $table->unique(['follower_id', 'followee_id']);
+            $table->index(['followee_id', 'status']);
         });
     }
 
@@ -22,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('follow');
+        Schema::dropIfExists('follows');
     }
 };
