@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -43,7 +44,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['parent_id', 'owner_type', 'owner_id', 'kind', 'name', 'slug', 'description', 'visibility', 'requires_approval', 'position', 'settings'])]
 class Space extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasFactory ,HasUuids, SoftDeletes;
     
     /** @return array<string, string> */
     protected function casts(): array

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -41,5 +42,15 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Give the user a profile, optionally with some of its attributes set.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function withProfile(array $attributes = []): static
+    {
+        return $this->has(Profile::factory()->state($attributes));
     }
 }

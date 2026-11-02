@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property string $id
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['space_id', 'profile_id', 'role', 'status'])]
 class SpaceMember extends Pivot
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     /**
      * Get the space that this member belongs to.

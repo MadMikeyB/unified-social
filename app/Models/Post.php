@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property string $id
@@ -48,7 +49,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 #[Fillable(['profile_id', 'space_id', 'parent_id', 'root_id', 'quoted_post_id', 'reposted_post_id', 'title', 'slug', 'body', 'visibility', 'client', 'is_locked', 'last_activity_at', 'edited_at'])]
 class Post extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes;
 
     /** @return array<string, string> */
     protected function casts(): array

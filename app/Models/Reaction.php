@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property string $id
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['profile_id', 'post_id', 'kind', 'type', 'value'])]
 class Reaction extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     /**
      * The "booted" method of the model.

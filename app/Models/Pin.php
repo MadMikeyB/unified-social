@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property string $id
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 #[Fillable(['pinner_type', 'pinner_id', 'pinnable_type', 'pinnable_id', 'kind', 'position'])]
 class Pin extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     /**
      * Get the profile or space that made this pin.
