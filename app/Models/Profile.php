@@ -21,23 +21,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string|null $display_name
  * @property string|null $bio
  * @property bool $is_private
- * @property array|null $settings
+ * @property array<string, mixed>|null $settings
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\User|null $user
+ * @property-read \App\Models\User $user
  * @property-read \App\Models\Space|null $wall
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Post> $posts
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Reaction> $re
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Reaction> $reactions
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Media> $media
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Profile> $following
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Profile> $followers
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Profile> $pending
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Profile> $pendingFollowers
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Profile> $friends
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Space> $spaces
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pin> $pins
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pin> $pins
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pin> $pinsOf
  */
 #[Table('profiles')]
 #[Fillable(['user_id', 'handle', 'display_name', 'bio', 'is_private', 'settings'])]
@@ -45,7 +43,9 @@ class Profile extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    /** @return array<string, string> */
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -56,8 +56,6 @@ class Profile extends Model
 
     /**
      * The "booted" method of the model.
-     * 
-     * @return void
      */
     protected static function booted(): void
     {
@@ -85,8 +83,8 @@ class Profile extends Model
 
     /**
      * Get the user that owns this profile.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this>
      */
     public function user(): BelongsTo
     {
@@ -95,8 +93,8 @@ class Profile extends Model
 
     /**
      * Get the wall space for this profile.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<\App\Models\Space, $this>
      */
     public function wall(): MorphOne
     {
@@ -105,8 +103,8 @@ class Profile extends Model
 
     /**
      * Get the posts authored by this profile.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Post, $this>
      */
     public function posts(): HasMany
     {
@@ -115,8 +113,8 @@ class Profile extends Model
 
     /**
      * Get the reactions made by this profile.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Reaction, $this>
      */
     public function reactions(): HasMany
     {
@@ -124,9 +122,9 @@ class Profile extends Model
     }
 
     /**
-     * Get the media attached to this profile.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * Get the media attached to this profile, such as its avatar and banner.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<\App\Models\Media, $this>
      */
     public function media(): MorphMany
     {
@@ -134,9 +132,9 @@ class Profile extends Model
     }
 
     /**
-     * Get the profiles that this profile is following.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Get the profiles this profile follows (accepted only).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Profile, $this, \App\Models\Follow>
      */
     public function following(): BelongsToMany
     {
@@ -148,9 +146,9 @@ class Profile extends Model
     }
 
     /**
-     * Get the profiles that are following this profile.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Get the profiles that follow this profile (accepted only).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Profile, $this, \App\Models\Follow>
      */
     public function followers(): BelongsToMany
     {
@@ -162,9 +160,9 @@ class Profile extends Model
     }
 
     /**
-     * Get the profiles that have requested to follow this profile.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Get the profiles waiting for this profile to accept their follow request.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Profile, $this, \App\Models\Follow>
      */
     public function pendingFollowers(): BelongsToMany
     {
@@ -176,9 +174,9 @@ class Profile extends Model
     }
 
     /**
-     * Get the profiles that are friends with this profile (mutual accepted follows).
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Get the profiles this profile has a mutual accepted follow with.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Profile, $this, \App\Models\Follow>
      */
     public function friends(): BelongsToMany
     {
@@ -187,50 +185,44 @@ class Profile extends Model
     }
 
     /**
-     * Follow another profile. (accepted straight away unless the profile is private)
-     *
-     * @param \App\Models\Profile $profile
-     * @return void
+     * Follow another profile: accepted straight away unless it's private.
+     * An existing follow or request is left as it is.
      */
-    public function follow(Profile $profile): void
+    public function follow(Profile $profile): Follow
     {
-        $this->following()->syncWithoutDetaching([
-            $profile->id => ['status' => $profile->is_private ? 'pending' : 'accepted'],
-        ]);
+        return $this->followRow($profile, $profile->is_private ? 'pending' : 'accepted');
     }
 
     /**
-     * Request to follow another profile. (always pending, regardless of privacy)
-     *
-     * @param \App\Models\Profile $profile
-     * @return void
+     * Ask to follow another profile, whatever its privacy.
+     * An existing follow is never downgraded back to a request.
      */
-    public function requestFollow(Profile $profile): void
+    public function requestFollow(Profile $profile): Follow
     {
-        $this->following()->syncWithoutDetaching([$profile->id => ['status' => 'pending']]);
+        return $this->followRow($profile, 'pending');
     }
 
     /**
-     * Accept a follow request from another profile. Optionally reciprocate the follow.
-     *
-     * @param \App\Models\Profile $profile
-     * @param bool $reciprocate
-     * @return void
+     * Accept a pending request from another profile, and optionally follow them back.
      */
     public function acceptFollower(Profile $profile, bool $reciprocate = false): void
     {
-        $this->pendingFollowers()->updateExistingPivot($profile->id, ['status' => 'accepted']);
+        Follow::where('follower_id', $profile->id)
+            ->where('followee_id', $this->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'accepted']);
 
         if ($reciprocate) {
-            $this->following()->syncWithoutDetaching([$profile->id => ['status' => 'accepted']]);
+            // accepting someone you'd asked to follow settles that request too
+            Follow::updateOrCreate(
+                ['follower_id' => $this->id, 'followee_id' => $profile->id],
+                ['status' => 'accepted'],
+            );
         }
     }
 
     /**
-     * Unfollow another profile or remove a follow request. (removes the row whatever its status, so a pending request can be withdrawn too)
-     *
-     * @param \App\Models\Profile $profile
-     * @return void
+     * Stop following another profile, or withdraw a pending request.
      */
     public function unfollow(Profile $profile): void
     {
@@ -238,9 +230,9 @@ class Profile extends Model
     }
 
     /**
-     * Get the spaces that this profile is a member of.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Get the spaces this profile is an accepted member of.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Space, $this, \App\Models\SpaceMember>
      */
     public function spaces(): BelongsToMany
     {
@@ -252,9 +244,9 @@ class Profile extends Model
     }
 
     /**
-     * Get the pins for this profile.
+     * Get everything this profile has pinned, in order.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<\App\Models\Pin, $this>
      */
     public function pins(): MorphMany
     {
@@ -262,13 +254,24 @@ class Profile extends Model
     }
 
     /**
-     * Get the pins of a specific kind for this profile.
+     * Get this profile's pins of one kind, in order.
      *
-     * @param string $kind
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<\App\Models\Pin, $this>
      */
     public function pinsOf(string $kind): MorphMany
     {
         return $this->pins()->where('kind', $kind);
+    }
+
+    /**
+     * Insert the follow row, or return the one that's already there untouched.
+     * Relies on the unique index on follower_id and followee_id.
+     */
+    protected function followRow(Profile $profile, string $status): Follow
+    {
+        return Follow::createOrFirst(
+            ['follower_id' => $this->id, 'followee_id' => $profile->id],
+            ['status' => $status],
+        );
     }
 }
